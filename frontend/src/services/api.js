@@ -1,8 +1,12 @@
 import axios from 'axios'
 import { userStorage } from './storage'
 
+const apiBaseUrl =
+    import.meta.env.VITE_API_URL?.trim() ||
+    '/api'
+
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: apiBaseUrl,
     timeout: 5000,
 })
 
