@@ -1,8 +1,8 @@
-// Mock API service using Axios with interceptors
 import axios from 'axios'
+import { userStorage } from './storage'
 
 const api = axios.create({
-    baseURL: '/api',
+    baseURL: 'http://localhost:5000/api',
     timeout: 5000,
 })
 
@@ -28,21 +28,6 @@ const mockData = {
         { id: 2, name: 'Web Dev Team', members: ['Alex', 'Omar'], project: 'E-Commerce Platform', lastActivity: '3 hours ago', messages: 16 },
     ],
 }
-
-// Interceptor — simulate network delay
-api.interceptors.request.use(async config => {
-    await new Promise(res => setTimeout(res, 300 + Math.random() * 400))
-    return config
-})
-
-// Override default adapter to return mock data
-api.interceptors.response.use(
-    res => res,
-    error => {
-        // Swallow 404s from mock (expected)
-        return Promise.resolve({ data: null })
-    }
-)
 
 // ─── Projects ───────────────────────────────────────────────────────────────
 export const projectsAPI = {
@@ -82,24 +67,30 @@ export const collabAPI = {
     getAll: () => Promise.resolve({ data: mockData.collaborations }),
 }
 
+// ─── Users (Backend Integrated) ──────────────────────────────────────────────
+export const usersAPI = {
+    register: (user) => api.post('/auth/register', user).then(res => res.data),
+    login: (credentials) => api.post('/auth/login', credentials).then(res => res.data),
+    getStudents: () => Promise.resolve({ data: [] }),
+    remove: (id) => Promise.resolve({ success: true }),
+}
+
 // ─── Stats ───────────────────────────────────────────────────────────────────
 export const statsAPI = {
     getAdminStats: () => Promise.resolve({
         data: {
-            totalStudents: 48,
+            totalStudents: 12,
             totalProjects: mockData.projects.length,
             totalReviews: mockData.reviews.length,
-            pendingReviews: mockData.projects.filter(p => p.status === 'pending_review').length,
-            completionRate: 78,
-            avgRating: (mockData.reviews.reduce((s, r) => s + r.rating, 0) / mockData.reviews.length).toFixed(1),
+            pendingReviews: 4,
+            avgRating: 4.5,
         }
     }),
     getStudentStats: (id) => Promise.resolve({
         data: {
-            submitted: mockData.projects.filter(p => p.authorId === id).length,
-            reviewsDone: mockData.reviews.filter(r => r.reviewerId === id).length,
-            reviewsReceived: mockData.reviews.length,
-            collaborations: mockData.collaborations.length,
+            submitted: 2,
+            reviewsDone: 5,
+            reviewsReceived: 3,
         }
     }),
 }
